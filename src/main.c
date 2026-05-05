@@ -1,42 +1,80 @@
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdint.h>
 
-#include "utils.h"
+#include "cpu.h"
+#include "alu.h"
+#include "ram.h"
+#include "controlunit.h"
+
+
+const uint8_t PROGRAM[] = {
+  1,
+  2,
+  3
+};
+
+
+void printState(ControlUnit *cu) {
+  CPU *cpu = cu->cpu;
+  RAM *ram = cu->ram;
+
+  printf(" || CPU || ");
+  printf("AF %04X | ", cpu->af);
+  printf("BC %04X | ", cpu->bc);
+  printf("DE %04X | ", cpu->de);
+  printf("HL %04X", cpu->hl);
+
+  printf("  ||\n || RAM || ");
+  printf("HL %04X [HL] %04X | ", cpu->hl, ram->data[cpu->hl]);
+  printf("PC %04X [PC] %04X", cpu->pc, ram->data[cpu->pc]);
+
+  printf(" ||\n\n");
+}
+
 
 int main(void) {
 
-  // Create hardware
+  // Create hardware & wires
+  Wires wires;
   CPU cpu;
-  RAM ram;
   ALU alu;
-  BusData bus;
+  RAM ram;
   ControlUnit cu;
 
   // Reset hardware
+  memset(&wires, 0, sizeof(Wires));
   memset(&cpu, 0, sizeof(CPU));
-  memset(&ram, 0, sizeof(RAM));
   memset(&alu, 0, sizeof(ALU));
-  memset(&bus, 0, sizeof(BusData));
-  memset(&cu,  0, sizeof(ControlUnit));
+  memset(&ram, 0, sizeof(RAM));
+  memset(&cu, 0, sizeof(ControlUnit));
 
-  // Set bus pointers
-  cpu.bus = &bus;
-  ram.bus = &bus;
-  alu.bus = &bus;
-  cu.bus  = &bus;
+  // Connect wires
+  cpu.wires = &wires;
+  alu.wires = &wires;
+  ram.wires = &wires;
+  cu.wires = &wires;
 
-  // Set CU pointers
+  // Connect hardware
   cu.cpu = &cpu;
-  cu.ram = &ram;
   cu.alu = &alu;
+  cu.ram = &ram;
+
+  // Connect registers
+  alu.regA = &(cpu.a);
+  alu.regB = &(cpu.b);
+
+  // Load program
+  memcpy(ram.data, PROGRAM, sizeof(PROGRAM));
 
   while (!cu.halt) {
     printState(&cu);
-    step(&cu);
+    updateCU(&cu);
   }
-  printf("-- HALTED --\n");
-   printState(&cu);
 
-	return 0;
+  printf("==> HALTED <==\n");
+  printState(&cu);
+
+  return 0;
 }
 
