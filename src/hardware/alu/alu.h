@@ -20,8 +20,8 @@ typedef enum {
 
 typedef struct {
   Wires *wires;
-  uint8_t *regA;
-  uint8_t *regB;
+  uint8_t regA;
+  uint8_t regB;
   uint8_t res;    // OUT
 } PACKED ALU;
 

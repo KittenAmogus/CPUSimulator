@@ -17,13 +17,19 @@ typedef struct {
   Wires *wires;
 
   struct {
-    REG_UNITED(a, f); // AF
-    REG_UNITED(b, c); // BC
-    REG_UNITED(d, e); // DE
-    REG_UNITED(h, l); // HL
+    union {
+      struct {
+        REG_UNITED(a, f); // AF
+        REG_UNITED(b, c); // BC
+        REG_UNITED(d, e); // DE
+        REG_UNITED(h, l); // HL
+      };
+      uint8_t regs[8];  // AFBCDEHL
+    };
   } PACKED;
 
   uint8_t ir;
+  uint16_t sp;
   uint16_t pc;
 
 } CPU;

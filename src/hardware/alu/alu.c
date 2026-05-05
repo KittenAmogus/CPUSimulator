@@ -1,7 +1,7 @@
 #include "alu.h"
 
-#define REGA (*alu->regA)
-#define REGB (*alu->regB)
+#define REGA (alu->regA)
+#define REGB (alu->regB)
 
 static void add(ALU *alu) {
   alu->res = REGA + REGB;
@@ -10,8 +10,7 @@ static void add(ALU *alu) {
 
 static void sub(ALU *alu) {
   alu->res = REGA - REGB;
-  alu->wires->alu.neg = REGA < REGB;
-};
+  alu->wires->alu.neg = REGA < REGB; };
 
 static void inc(ALU *alu) {
   alu->wires->alu.ovf = REGA == 0xFF;

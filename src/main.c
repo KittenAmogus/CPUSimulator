@@ -7,29 +7,37 @@
 #include "ram.h"
 #include "controlunit.h"
 
+// #define printf // Fast mode, no logs
 
-const uint8_t PROGRAM[] = {
+static const uint8_t PROGRAM[] = {
   1,
   2,
   3
 };
 
 
-void printState(ControlUnit *cu) {
+static inline void printTable(void) {
+  printf("++------++------++------++------++------++------++------++\n");
+  printf("||  AF  ||  BC  ||  DE  ||  HL  ||  PC  || [HL] || [PC] ||\n");
+  printf("++------++------++------++------++------++------++------++\n");
+}
+
+
+static void printState(ControlUnit *cu) {
   CPU *cpu = cu->cpu;
   RAM *ram = cu->ram;
 
-  printf(" || CPU || ");
-  printf("AF %04X | ", cpu->af);
-  printf("BC %04X | ", cpu->bc);
-  printf("DE %04X | ", cpu->de);
-  printf("HL %04X", cpu->hl);
+  printf("||"
+    "\x1b[95m %04X \x1b[0m||"
+    "\x1b[95m %04X \x1b[0m||"
+    "\x1b[95m %04X \x1b[0m||"
+    "\x1b[95m %04X \x1b[0m||"
+    "\x1b[95m %04X \x1b[0m||"
 
-  printf("  ||\n || RAM || ");
-  printf("HL %04X [HL] %04X | ", cpu->hl, ram->data[cpu->hl]);
-  printf("PC %04X [PC] %04X", cpu->pc, ram->data[cpu->pc]);
-
-  printf(" ||\n\n");
+    "\x1b[95m  %02X  \x1b[0m||"
+    "\x1b[95m  %02X  \x1b[0m||\n",
+    cpu->af, cpu->bc, cpu->de, cpu->hl, cpu->pc, ram->data[cpu->hl], ram->data[cpu->pc]
+  );
 }
 
 
@@ -67,13 +75,17 @@ int main(void) {
   // Load program
   memcpy(ram.data, PROGRAM, sizeof(PROGRAM));
 
+  printTable();
   while (!cu.halt) {
     printState(&cu);
     updateCU(&cu);
   }
 
-  printf("==> HALTED <==\n");
+  printf("++------++------++------++------++------++------++------++\n");
+  printf("||                     \x1b[91m-> HALTED <-\x1b[0m                     ||\n");
+  printTable();
   printState(&cu);
+  printf("++------++------++------++------++------++------++------++\n");
 
   return 0;
 }
